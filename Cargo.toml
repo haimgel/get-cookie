@@ -1,0 +1,15 @@
+[package]
+name = "get-cookie"
+version = "0.1.0"
+authors = ["Haim Gelfenbeyn <haim@g8n.me>"]
+edition = "2018"
+
+[dependencies]
+dirs = "^3"
+rusqlite = "^0"
+keyring = "^0"
+ring = "^0"
+aes = "^0"
+block-modes = "^0"
+thiserror = "^1"
+chrono = "^0"
