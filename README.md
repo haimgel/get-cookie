@@ -1,4 +1,4 @@
-# `get-cookie`: Fetch a cookie from a local browser's cookie store
+# Fetch a cookie from a local browser's cookie store
 
 **DON'T USE THIS CRATE** for anything you ship to users or need to support in a long-term!
 
