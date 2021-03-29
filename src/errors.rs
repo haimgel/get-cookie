@@ -20,5 +20,7 @@ pub enum GetCookieError {
     InvalidCookieFormat,
     #[error("cookie decryption error")]
     DecryptionError,
+    #[error("cookie not found")]
+    CookieNotFound,
 }
 

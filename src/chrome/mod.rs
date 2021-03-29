@@ -54,7 +54,7 @@ fn chrome_timestamp_to_time(chrome_timestamp: i64) -> Option<DateTime<Utc>> {
 
 /// Get encrypted cookie from Chrome's cookie database.
 /// Tested on Chrome V89, should work on Chrome V80+
-fn get_encrypted_cookie(domain: &str, cookie_name: &str) -> Result<Option<Cookie>, GetCookieError> {
+fn get_encrypted_cookie(domain: &str, cookie_name: &str) -> Result<Cookie, GetCookieError> {
     let connection = Connection::open_with_flags(cookie_jar()?, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
     let result = connection.query_row(
         "SELECT host_key, expires_utc, last_access_utc, encrypted_value
@@ -68,19 +68,15 @@ fn get_encrypted_cookie(domain: &str, cookie_name: &str) -> Result<Option<Cookie
                 expires: chrome_timestamp_to_time(row.get(1)?),
                 domain: row.get(0)?,
             })
-    ).optional()?;
-    return Ok(result);
+    ).optional()?.ok_or(GetCookieError::CookieNotFound);
+    return result;
 }
 
 /// Get a cookie with a given name for a given domain
-pub fn get_cookie(domain: &str, cookie: &str) -> Result<Option<Cookie>, GetCookieError> {
-    let cookie = get_encrypted_cookie(domain, cookie)?;
-    return if let Some(mut cookie) = cookie {
-        if let CookieValue::Encrypted(encrypted) = cookie.value {
-            cookie.value = CookieValue::Text(decrypt_encrypted_cookie(&encrypted)?)
-        }
-        Ok(Some(cookie))
-    } else {
-        Ok(None)
+pub fn get_cookie(domain: &str, cookie: &str) -> Result<Cookie, GetCookieError> {
+    let mut cookie = get_encrypted_cookie(domain, cookie)?;
+    if let CookieValue::Encrypted(encrypted) = cookie.value {
+        cookie.value = CookieValue::Text(decrypt_encrypted_cookie(&encrypted)?)
     }
+    Ok(cookie)
 }
