@@ -76,7 +76,7 @@ fn get_encrypted_cookie(domain: &str, cookie_name: &str) -> Result<Cookie, GetCo
 pub fn get_cookie(domain: &str, cookie: &str) -> Result<Cookie, GetCookieError> {
     let mut cookie = get_encrypted_cookie(domain, cookie)?;
     if let CookieValue::Encrypted(encrypted) = cookie.value {
-        cookie.value = CookieValue::Text(decrypt_encrypted_cookie(&encrypted)?)
+        cookie.value = CookieValue::Text(decrypt_encrypted_cookie(encrypted)?)
     }
     Ok(cookie)
 }
