@@ -6,7 +6,7 @@ edition = "2021"
 description = "Fetch a cookie from a local browser's cookie store"
 readme = "README.md"
 repository = "https://github.com/haimgel/get-cookie"
-license = "GPLv3"
+license = "GPL-3.0-only"
 keywords = ["browser", "cookie"]
 categories = ["parsing", "os", "api-bindings"]
 
