@@ -1,8 +1,8 @@
 [package]
 name = "get-cookie"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Haim Gelfenbeyn <haim@g8n.me>"]
-edition = "2018"
+edition = "2021"
 description = "Fetch a cookie from a local browser's cookie store"
 readme = "README.md"
 repository = "https://github.com/haimgel/get-cookie"
@@ -11,9 +11,9 @@ keywords = ["browser", "cookie"]
 categories = ["parsing", "os", "api-bindings"]
 
 [dependencies]
-dirs = "^3"
+dirs = "^4"
 rusqlite = "^0"
-keyring = "^0"
+keyring = "^1"
 ring = "^0"
 aes = "^0"
 block-modes = "^0"

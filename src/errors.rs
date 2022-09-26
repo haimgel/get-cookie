@@ -14,7 +14,7 @@ pub enum GetCookieError {
     #[error(transparent)]
     KeyringError {
         #[from]
-        source: keyring::KeyringError
+        source: keyring::Error
     },
     #[error("invalid cookie format")]
     InvalidCookieFormat,

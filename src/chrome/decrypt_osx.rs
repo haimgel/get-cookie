@@ -15,7 +15,7 @@ fn get_chrome_key() -> Result<Credential, GetCookieError>{
     // Follows the same algorithm as `GetEncryptionKey` in:
     // https://source.chromium.org/chromium/chromium/src/+/master:components/os_crypt/os_crypt_mac.mm;l=66
 
-    let keyring = keyring::Keyring::new("Chrome Safe Storage", "Chrome");
+    let keyring = keyring::Entry::new("Chrome Safe Storage", "Chrome");
     let key = keyring.get_password()?;
 
     let mut derived_key = [0u8; CREDENTIALS_LEN];
