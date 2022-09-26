@@ -1,6 +1,6 @@
+use keyring;
 use rusqlite;
 use thiserror::Error;
-use keyring;
 
 #[derive(Error, Debug)]
 pub enum GetCookieError {
@@ -9,12 +9,12 @@ pub enum GetCookieError {
     #[error(transparent)]
     SQLiteError {
         #[from]
-        source: rusqlite::Error
+        source: rusqlite::Error,
     },
     #[error(transparent)]
     KeyringError {
         #[from]
-        source: keyring::Error
+        source: keyring::Error,
     },
     #[error("invalid cookie format")]
     InvalidCookieFormat,
@@ -23,4 +23,3 @@ pub enum GetCookieError {
     #[error("cookie not found")]
     CookieNotFound,
 }
-

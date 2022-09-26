@@ -1,11 +1,11 @@
-use dirs::home_dir;
-use std::path::PathBuf;
-use rusqlite::{Connection, Result, OpenFlags, OptionalExtension};
 use chrono;
-use chrono::{DateTime, Utc, NaiveDateTime};
+use chrono::{DateTime, NaiveDateTime, Utc};
+use dirs::home_dir;
+use rusqlite::{Connection, OpenFlags, OptionalExtension, Result};
+use std::path::PathBuf;
 
-use crate::errors::GetCookieError;
 use crate::cookie::{Cookie, CookieValue};
+use crate::errors::GetCookieError;
 
 #[cfg(target_os = "macos")]
 mod decrypt_osx;
@@ -21,7 +21,7 @@ use decrypt_win::decrypt_encrypted_cookie;
 fn chrome_profile_dir() -> Result<PathBuf, GetCookieError> {
     let mut result = home_dir().ok_or(GetCookieError::DatabaseNotFound)?;
     result.push("Library/Application Support/Google/Chrome/Default");
-    return Ok(result)
+    return Ok(result);
 }
 
 fn cookie_jar() -> Result<PathBuf, GetCookieError> {
@@ -31,7 +31,7 @@ fn cookie_jar() -> Result<PathBuf, GetCookieError> {
         Ok(result)
     } else {
         Err(GetCookieError::DatabaseNotFound)
-    }
+    };
 }
 
 /// Chrome stores time in Microsoft Gregorian calendar epoch, even on Mac. It is the same across all platforms.
@@ -49,26 +49,31 @@ fn chrome_timestamp_to_time(chrome_timestamp: i64) -> Option<DateTime<Utc>> {
         let nanoseconds = (timestamp % NANOSECONDS_IN_SECONDS) as u32;
         NaiveDateTime::from_timestamp_opt(seconds, nanoseconds)
             .map(|d| DateTime::<Utc>::from_utc(d, Utc))
-    }
+    };
 }
 
 /// Get encrypted cookie from Chrome's cookie database.
 /// Tested on Chrome V89, should work on Chrome V80+
 fn get_encrypted_cookie(domain: &str, cookie_name: &str) -> Result<Cookie, GetCookieError> {
     let connection = Connection::open_with_flags(cookie_jar()?, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
-    let result = connection.query_row(
-        "SELECT host_key, expires_utc, last_access_utc, encrypted_value
+    let result = connection
+        .query_row(
+            "SELECT host_key, expires_utc, last_access_utc, encrypted_value
                     FROM cookies
                     WHERE host_key LIKE ? and name=?",
-        &[domain, cookie_name], |row|
-            Ok(Cookie {
-                name: cookie_name.to_string(),
-                value: CookieValue::Encrypted(row.get(3)?),
-                last_access: chrome_timestamp_to_time(row.get(2)?),
-                expires: chrome_timestamp_to_time(row.get(1)?),
-                domain: row.get(0)?,
-            })
-    ).optional()?.ok_or(GetCookieError::CookieNotFound);
+            &[domain, cookie_name],
+            |row| {
+                Ok(Cookie {
+                    name: cookie_name.to_string(),
+                    value: CookieValue::Encrypted(row.get(3)?),
+                    last_access: chrome_timestamp_to_time(row.get(2)?),
+                    expires: chrome_timestamp_to_time(row.get(1)?),
+                    domain: row.get(0)?,
+                })
+            },
+        )
+        .optional()?
+        .ok_or(GetCookieError::CookieNotFound);
     return result;
 }
 

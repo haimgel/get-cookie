@@ -12,7 +12,7 @@ type Credential = [u8; CREDENTIALS_LEN];
 type Aes128Cbc = cbc::Decryptor<aes::Aes128Dec>;
 
 /// Get a Chrome decryption key: it is stored in the Keyring for security
-fn get_chrome_key() -> Result<Credential, GetCookieError>{
+fn get_chrome_key() -> Result<Credential, GetCookieError> {
     // Follows the same algorithm as `GetEncryptionKey` in:
     // https://source.chromium.org/chromium/chromium/src/+/master:components/os_crypt/os_crypt_mac.mm;l=66
 
@@ -25,7 +25,7 @@ fn get_chrome_key() -> Result<Credential, GetCookieError>{
         NonZeroU32::new(1003u32).unwrap(),
         "saltysalt".as_bytes(),
         key.as_bytes(),
-        &mut derived_key
+        &mut derived_key,
     );
     return Ok(derived_key);
 }
@@ -36,7 +36,7 @@ pub fn decrypt_encrypted_cookie(mut cookie: Vec<u8>) -> Result<String, GetCookie
     // https://source.chromium.org/chromium/chromium/src/+/master:components/os_crypt/os_crypt_mac.mm;l=170
     let (signature, data) = cookie.split_at_mut(3);
     if std::str::from_utf8(signature) != Ok("v10") {
-        return Err(GetCookieError::InvalidCookieFormat)
+        return Err(GetCookieError::InvalidCookieFormat);
     }
     let key = get_chrome_key()?;
     let iv = [0x20u8; CREDENTIALS_LEN];

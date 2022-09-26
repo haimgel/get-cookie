@@ -1,6 +1,6 @@
-use ring::aead;
-use ring::aead::{Nonce, BoundKey};
 use crate::errors::GetCookieError;
+use ring::aead;
+use ring::aead::{BoundKey, Nonce};
 
 /// WARNING: Windows support is not implemented yet, not even 25%
 /// For reference, see:
@@ -33,13 +33,13 @@ fn get_chrome_key() -> Result<Vec<u8>, GetCookieError> {
 pub fn decrypt_encrypted_cookie(cookie: &Vec<u8>) -> Result<String, GetCookieError> {
     if cookie.len() < 15 {
         // Should be at least 15 bytes: 3 bytes prefix + 12 bytes IV
-        return Err(GetCookieError::InvalidCookieFormat)
+        return Err(GetCookieError::InvalidCookieFormat);
     }
     let (signature, data) = cookie.split_at(3);
     let (iv, encrypted) = data.split_at(12);
 
     if std::str::from_utf8(signature) != Ok("v10") {
-        return Err(GetCookieError::InvalidCookieFormatVersion)
+        return Err(GetCookieError::InvalidCookieFormatVersion);
     }
     let key = get_chrome_key()?;
 
@@ -47,7 +47,9 @@ pub fn decrypt_encrypted_cookie(cookie: &Vec<u8>) -> Result<String, GetCookieErr
     let nonce = Nonce::try_assume_unique_for_key(&iv).unwrap();
     let x = OneNonceSequence::new(nonce);
     let mut key = aead::OpeningKey::new(key, x);
-    let mut buffer= Vec::from(encrypted);
-    let out = key.open_in_place(ring::aead::Aad::empty(), &mut buffer).unwrap();
+    let mut buffer = Vec::from(encrypted);
+    let out = key
+        .open_in_place(ring::aead::Aad::empty(), &mut buffer)
+        .unwrap();
     return Ok(String::from_utf8(Vec::from(out)).unwrap());
 }
